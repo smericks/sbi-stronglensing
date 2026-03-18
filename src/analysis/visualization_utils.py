@@ -1,9 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import corner
-from scipy.integrate import trapz
 from scipy.stats import norm, gaussian_kde
-from tarp import get_tarp_coverage
 from analysis.diagnostic_utils import check_coverage, check_parity
 from astropy.visualization import simple_norm
 import os

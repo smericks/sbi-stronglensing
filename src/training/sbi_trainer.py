@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 import h5py
-from sbi.inference import NPE
+from sbi.inference import NPE_C
 from datetime import datetime
 import os
 import pickle
@@ -99,10 +99,10 @@ def train_npe_model(model, theta, x,
     # Build inference object
     if save_folder is not None:
         # Create a custom summary writer method and assign it
-        NPE._default_summary_writer = make_summary_writer(save_folder)
+        NPE_C._default_summary_writer = make_summary_writer(save_folder)
         print(f"To view training progress, run:\ntensorboard --logdir={save_folder}")
     
-    inference = NPE(density_estimator=model, show_progress_bars=show_progress_bars)
+    inference = NPE_C(density_estimator=model, show_progress_bars=show_progress_bars)
     
     # Append simulations to inference object
     inference.append_simulations(theta, x, data_device = 'cpu')

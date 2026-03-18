@@ -14,14 +14,14 @@ import argparse
 # Local imports
 try:
     # When running as a module from src directory
-    from training.data_loader import load_data
+    from training.data_loader import load_data, load_h5_data
     from training.feature_extractor import get_feature_extractor
     from training.posterior_estimator import get_posterior_estimator
     from training.sbi_trainer import get_npe_model, train_npe_model
     from analysis.visualization_utils import plot_trainval_loss
 except ImportError:
     # When running directly from training directory
-    from data_loader import load_data
+    from data_loader import load_data, load_h5_data
     from feature_extractor import get_feature_extractor
     from posterior_estimator import get_posterior_estimator
     from sbi_trainer import get_npe_model, train_npe_model
@@ -48,8 +48,9 @@ def execute_training(config_path):
     save_folder = os.path.join(save_directory, f"{density_estimator_type}", folder_name)
 
     # Load data
-    theta, x = load_data(**config['data_loader'])
-    print(f"Loaded {len(theta)} training examples from {config['data_loader']['data_directory']}")
+    theta, x = load_h5_data(**config['data_loader'])
+    #theta, x = load_data(**config['data_loader'])
+    print(f"Loaded {len(theta)} training examples") #from {config['data_loader']['data_directory']}")
 
     # Get NPE model 
     npe_model = get_npe_model(**config['feature_extractor'], **config['posterior_estimator'])

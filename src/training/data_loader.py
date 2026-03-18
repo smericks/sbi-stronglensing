@@ -30,3 +30,30 @@ def load_data(data_directory, parameter_labels):
     labels = load_csv_labels(labels_path, parameter_labels)
     data = load_hdf5_images(data_path)
     return labels, data
+
+def load_h5_data(data_file_list, image_type, parameter_labels):
+    """
+    Args:
+        data_file_list ([string]): list of .h5 filepaths, .h5 file contains both images and metadata
+        image_type (string): ex: 'image_flux_Roman_F158'. The key to extract images from .h5 file
+        parameter_labels ([string]): keys of target parameters for training
+
+    Returns: 
+        theta, ims
+    """
+    # instantiate with first file in list
+    h5_file_path = data_file_list[0]
+    theta = load_hdf5_labels(h5_file_path, parameter_labels)
+    ims = load_hdf5_images(h5_file_path,image_type)
+
+    if len(data_file_list) > 1:
+        for i in range(1,len(data_file_list)):
+            new_theta = load_hdf5_labels(data_file_list[i],parameter_labels)
+            new_ims = load_hdf5_images(data_file_list[i],image_type)
+
+            # add to existing tensors
+            theta = torch.cat([theta, new_theta], dim=0)
+            ims = torch.cat([ims, new_ims], dim=0)
+
+
+    return theta, ims

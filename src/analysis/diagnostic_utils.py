@@ -1,6 +1,6 @@
 import numpy as np
 from tarp import get_tarp_coverage
-from scipy.integrate import trapz
+#from scipy.integrate import trapz
 from scipy.stats import kstest
 
 # === COVERAGE FUNCTIONS ===
@@ -28,8 +28,8 @@ def check_coverage(ecp, alpha, metrics=['ECE', 'AUC', 'ATC', 'KS']):
     if 'ECE' in metrics:
         metric_values['ECE'] = np.mean(np.abs(np.array(ecp) - np.array(alpha)))
 
-    if 'AUC' in metrics:
-        metric_values['AUC'] = trapz(np.array(ecp), np.array(alpha))
+    #if 'AUC' in metrics:
+    #    metric_values['AUC'] = trapz(np.array(ecp), np.array(alpha))
 
     if 'ATC' in metrics:
         midindex = alpha.shape[0] // 2
