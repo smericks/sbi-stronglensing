@@ -46,6 +46,7 @@ def load_h5_data(data_file_list, image_type, parameter_labels):
     theta = load_hdf5_labels(h5_file_path, parameter_labels)
     ims = load_hdf5_images(h5_file_path,image_type)
 
+    # then add other files in sequence
     if len(data_file_list) > 1:
         for i in range(1,len(data_file_list)):
             new_theta = load_hdf5_labels(data_file_list[i],parameter_labels)

@@ -11,6 +11,8 @@ import pickle
 import argparse
 
 
+# USAGE: "python3 xecute_training.py config_files/p3_nsf.yaml"
+
 # Local imports
 try:
     # When running as a module from src directory
@@ -58,7 +60,8 @@ def execute_training(config_path):
 
     # Train NPE model
     print("Training NPE model...")
-    inference, estimator, posterior = train_npe_model(npe_model, theta, x, **config['sbi_trainer'], save_folder=save_folder)
+    inference, estimator, posterior = train_npe_model(npe_model, theta, x, 
+        **config['sbi_trainer'], save_folder=save_folder)
     print("Training completed. Saving results...")
 
     
@@ -92,89 +95,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Execute training
-    execute_training(args.config_path)
-
-    # # Print help message
-    # print("Usage: python xecute_training.py <config_path>")
-
-  
-
-
-#   def _default_summary_writer(self) -> SummaryWriter:
-#         """Return summary writer logging to method- and simulator-specific directory."""
-
-#         method = self.__class__.__name__
-#         logdir = Path(
-#             get_log_root(), method, datetime.now().isoformat().replace(":", "_")
-#         )
-#         return SummaryWriter(logdir)
-
-# def _summarize(
-#         self,
-#         round_: int,
-#     ) -> None:
-#         """Update the summary_writer with statistics for a given round.
-
-#         During training several performance statistics are added to the summary, e.g.,
-#         using `self._summary['key'].append(value)`. This function writes these values
-#         into summary writer object.
-
-#         Args:
-#             round: index of round
-
-#         Scalar tags:
-#             - epochs_trained:
-#                 number of epochs trained
-#             - best_validation_loss:
-#                 best validation loss (for each round).
-#             - validation_loss:
-#                 validation loss for every epoch (for each round).
-#             - training_loss
-#                 training loss for every epoch (for each round).
-#             - epoch_durations_sec
-#                 epoch duration for every epoch (for each round)
-
-#         """
-
-#         # Add most recent training stats to summary writer.
-#         self._summary_writer.add_scalar(
-#             tag="epochs_trained",
-#             scalar_value=self._summary["epochs_trained"][-1],
-#             global_step=round_ + 1,
-#         )
-
-#         self._summary_writer.add_scalar(
-#             tag="best_validation_loss",
-#             scalar_value=self._summary["best_validation_loss"][-1],
-#             global_step=round_ + 1,
-#         )
-
-#         # Add validation loss for every epoch.
-#         # Offset with all previous epochs.
-#         offset = (
-#             torch.tensor(self._summary["epochs_trained"][:-1], dtype=torch.int)
-#             .sum()
-#             .item()
-#         )
-#         for i, vlp in enumerate(self._summary["validation_loss"][offset:]):
-#             self._summary_writer.add_scalar(
-#                 tag="validation_loss",
-#                 scalar_value=vlp,
-#                 global_step=offset + i,
-#             )
-
-#         for i, tlp in enumerate(self._summary["training_loss"][offset:]):
-#             self._summary_writer.add_scalar(
-#                 tag="training_loss",
-#                 scalar_value=tlp,
-#                 global_step=offset + i,
-#             )
-
-#         for i, eds in enumerate(self._summary["epoch_durations_sec"][offset:]):
-#             self._summary_writer.add_scalar(
-#                 tag="epoch_durations_sec",
-#                 scalar_value=eds,
-#                 global_step=offset + i,
-#             )
-
-#         self._summary_writer.flush()
+    execute_training(args.config_path)  
