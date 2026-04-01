@@ -2,9 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import corner
 from scipy.stats import norm, gaussian_kde
+import os 
+import sys
+dirname = os.path.dirname(__file__)
+sys.path.insert(0, os.path.join(dirname, '../'))
 from analysis.diagnostic_utils import check_coverage, check_parity
 from astropy.visualization import simple_norm
 import os
+import arviz as az
+import warnings
 
 # === TRAINING PLOT FUNCTIONS ===
 
@@ -116,7 +122,8 @@ def plot_corner_overlay(fig, samples, color, legend_label=None):
         smooth=1.0,
         hist_kwargs=dict(density=True, color=color, linewidth=2, histtype='step'),
         color=color,
-        fig=fig
+        fig=fig,
+        range=np.ones(np.array(samples).shape[1])*0.995
     )
     
     # Delegate legend update to our helper
@@ -124,7 +131,7 @@ def plot_corner_overlay(fig, samples, color, legend_label=None):
 
     return fig
 
-def update_corner_legend(fig, color, legend_label, lw = 2, fontsize = 20):
+def update_corner_legend(fig, color, legend_label, lw = 2, fontsize = 40):
 
     # Retrieve old handles & labels if they exist
     old_handles = getattr(fig, '_my_legend_handles', [])
@@ -414,5 +421,79 @@ def plot_parity_simple(true_values, predicted_values_list, error_values_list,
     plt.show()
 
     return ax
+
+
+
+def table_of_metrics(posterior_samples, true_values, param_labels, log_param_idx=None):
+    """
+    Args:
+        posterior_samples np.ndarray(float), shape=(n_samples,n_lenses,n_params): 
+        true_values np.ndarray(float), shape=(n_lenses,n_params):
+        param_labels [string], shape=(n_params): labels for each parameter
+        log_param_idx [int]: 
+    """
+
+    if log_param_idx is not None:
+        for lidx in log_param_idx:
+            true_values[:,lidx] = np.exp(true_values[:,lidx])
+            posterior_samples[:,:,lidx] = np.exp(posterior_samples[:,:,lidx])
+
+
+    # I want bias, accuracy, precision, and ECE (tarp coverage metric)
+
+    posterior_median = np.median(posterior_samples,axis=0) # median of posterior
+
+    # TODO: bias = median( predicted - truth )
+    median_bias = np.median(posterior_median - true_values,axis=0) # avg. across test set
+
+    # TODO: accuracy
+    median_accuracy = np.median(np.abs(posterior_median - true_values),axis=0)
+
+    # TODO: precision (1/2 the 68% confidence interval, analagous to 1sigma if Gaussian)
+    # loop thru each param
+    median_prec = []
+
+    # loop thru each parameter
+    for p in range(0,np.shape(true_values)[-1]):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=FutureWarning)
+        # condenses along every dim. except the last...
+        arviz_hdi = az.hdi(posterior_samples[:,:,p], hdi_prob=.68)
+        # arviz_hdi has shape: (n_lenses,2)
+        median_prec_param_p = np.median((arviz_hdi[:,1] - arviz_hdi[:,0])/2)
+        median_prec.append(median_prec_param_p)
+
+    # print out the table!
+    f = sys.stdout
+
+
+    for p_lab in param_labels:
+        f.write(' & ')
+        f.write(p_lab)
+
+    f.write(r'\\')
+    f.write('\n')
+    f.write('\hline')
+    f.write('\n')
+    metrics = [median_bias,median_accuracy,median_prec]
+    for i,lab in enumerate(['Median Bias','MAE','Median($\sigma$)']):
+        f.write(lab)
+        f.write(' ')
+
+        for m in metrics[i]:
+            f.write('& ')
+            f.write(str(np.around(m,2)))
+            f.write(' ')
+
+
+        f.write(r'\\')
+        f.write('\n')
+        f.write('\hline')
+        f.write('\n')
+
+
+    # TODO: TARP ECE
+
+
 
 
