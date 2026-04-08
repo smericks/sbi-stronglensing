@@ -13,36 +13,24 @@ class ResNetFeatureExtractor(nn.Module):
         super(ResNetFeatureExtractor, self).__init__()
         
         # Load ResNet34 architecture
-        self.resnet = resnet34(weights=weights)
-        
-        # Modify first conv layer to accept single channel input
+        # num_classes controls the number of features in the FC layer
+        self.resnet = resnet34(weights=weights,num_classes=output_dim) # TODO: this arg?
+
+        # NOTE: hardcoded to 1-channel input!! 
+        #   (the hardcoding of 64, 7, 2, 3 matches the original implementation)
         self.resnet.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        
-        # Remove the final fully connected layer
-        self.features = nn.Sequential(*list(self.resnet.children())[:-1])
-        
-        # Use the stored number of features for the FC layer
-        self.fc = nn.Linear(512, output_dim)
 
         
     def forward(self, x):
-        # Ensure input is float and normalized
+        # Ensure input is float
         x = x.float()
-        if x.max() > 1:
-            x = x / 255.0
             
         # Add channel dimension if missing
         if x.dim() == 3:  # [batch, height, width]
             x = x.unsqueeze(1)  # -> [batch, channel, height, width]
             
         # Extract features through ResNet
-        x = self.features(x)
-        
-        # Flatten 
-        x = x.view(x.size(0), -1)
-        
-        # Final fully connected layer
-        x = self.fc(x)
+        x = self.resnet.forward(x)
         
         return x
 

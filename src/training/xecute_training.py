@@ -49,6 +49,14 @@ def execute_training(config_path):
     folder_name = f"{density_estimator_type}_{feature_extractor_type}_{date_time}"
     save_folder = os.path.join(save_directory, f"{density_estimator_type}", folder_name)
 
+    # Save config file
+    # Save training results
+    os.makedirs(save_folder, exist_ok=True)
+
+    # save config before running anything
+    with open(os.path.join(save_folder, "config.yaml"), "w") as f:
+        yaml.dump(config, f)
+
     # Load data
     theta, x = load_h5_data(**config['data_loader'])
     #theta, x = load_data(**config['data_loader'])
@@ -64,13 +72,7 @@ def execute_training(config_path):
         **config['sbi_trainer'], save_folder=save_folder)
     print("Training completed. Saving results...")
 
-    
     # Save training results
-    os.makedirs(save_folder, exist_ok=True)
-
-    with open(os.path.join(save_folder, "config.yaml"), "w") as f:
-        yaml.dump(config, f)
-
     with open(os.path.join(save_folder, "inference.pkl"), "wb") as f:
         pickle.dump(inference, f)
 
